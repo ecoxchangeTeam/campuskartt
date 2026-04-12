@@ -74,13 +74,17 @@
     }
     .orbit-track {
       position: absolute;
+      top: 0; left: 0;
       width: 430px; height: 430px;
       border-radius: 50%;
       border: 1px dashed rgba(242,101,34,0.18);
       box-shadow: 0 0 0 1px rgba(242,101,34,0.05);
     }
     .orbit-hub {
-      position: absolute; z-index: 10;
+      position: absolute;
+      top: 50%; left: 50%;
+      margin: -41px 0 0 -41px;
+      z-index: 10;
       width: 82px; height: 82px; border-radius: 50%;
       background: var(--bg-card);
       border: 2px solid var(--orange);
@@ -94,8 +98,10 @@
     }
     .orbit-ring {
       position: absolute;
+      top: 0; left: 0;
       width: 430px; height: 430px;
       animation: orbitSpin 28s linear infinite;
+      transform-origin: center;
     }
     .orbit-ring.paused { animation-play-state: paused; }
     @keyframes orbitSpin { to { transform: rotate(360deg); } }
@@ -235,10 +241,30 @@
     .desc-prompt-chip:hover { background: rgba(242,101,34,0.10); color: var(--orange); }
 
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-    @media (max-width: 480px) {
-      .category-grid { grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
-      .section-card-body { padding: 1.1rem; }
-      .submit-area { flex-direction: column; }
+
+    /* ── Mobile: Orbital Scaler ── */
+    .orbit-scaler {
+      position: relative;
+      width: 430px; height: 430px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .post-layout { padding: 1.5rem 1rem 4rem; }
+    }
+    @media (max-width: 520px) {
+      .section-card-body { padding: 1rem; }
+      .submit-area { flex-direction: column; text-align: center; }
+      /* Scale orbital to fit phone screens (375px -> fits 280px visual) */
+      .orbital-wrapper { height: 300px; overflow: visible; }
+      .orbit-scaler   { transform: scale(0.62); transform-origin: center center; }
+      .orbit-sel-name { font-size: 0.85rem; }
+    }
+    @media (max-width: 360px) {
+      .orbital-wrapper { height: 270px; }
+      .orbit-scaler   { transform: scale(0.55); }
     }
   </style>
 </head>
@@ -257,8 +283,14 @@
       </div>
       <div class="ck-nav-right">
         <div class="ck-user-icon" id="user-avatar">?</div>
+        <button class="ck-menu-toggle" id="ck-menu-toggle" onclick="ckToggleMobileMenu()" aria-label="Toggle menu">☰</button>
       </div>
     </nav>
+    <div class="ck-mobile-menu" id="ck-mobile-menu">
+      <a href="browse.html" class="ck-mobile-nav-link">🛍️ Marketplace</a>
+      <a href="post.html" class="ck-mobile-nav-link active">📦 Sell an Item</a>
+      <a href="dashboard.html" class="ck-mobile-nav-link">👤 My Account</a>
+    </div>
   </header>
 
   <div class="post-layout">
@@ -316,12 +348,14 @@
           <div id="cat-error" class="alert alert-error hidden" style="margin-bottom:0.5rem;">⚠ Please select a category.</div>
 
           <div class="orbital-wrapper">
-            <div class="orbit-track"></div>
-            <div class="orbit-hub">
-              <img src="../static/images/campus-kartt-logo.png" style="width:54px;object-fit:contain;" alt="CK" />
-            </div>
-            <div class="orbit-ring" id="orbit-ring">
-              <!-- Nodes injected by JS -->
+            <div class="orbit-scaler">
+              <div class="orbit-track"></div>
+              <div class="orbit-hub">
+                <img src="../static/images/campus-kartt-logo.png" style="width:54px;object-fit:contain;" alt="CK" />
+              </div>
+              <div class="orbit-ring" id="orbit-ring">
+                <!-- Nodes injected by JS -->
+              </div>
             </div>
           </div>
 
@@ -629,6 +663,12 @@
       btn.disabled = loading;
       btn.textContent = loading ? '' : 'Sell Your Item ⚡';
       if (loading) btn.classList.add('btn-loading'); else btn.classList.remove('btn-loading');
+    }
+    function ckToggleMobileMenu() {
+      const menu = document.getElementById('ck-mobile-menu');
+      const btn  = document.getElementById('ck-menu-toggle');
+      if (menu) menu.classList.toggle('active');
+      if (btn)  btn.textContent = menu.classList.contains('active') ? '✕' : '☰';
     }
 
     init();
