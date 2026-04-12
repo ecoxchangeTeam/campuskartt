@@ -204,7 +204,7 @@
 .ck-nav-link.active::after { transform: translateX(-50%) scaleX(1); }
 .ck-nav-link.active { color: #F26522; }
 
-/* MCE Community Badge in navbar */
+/* EcoXchange Badge in navbar */
 .ck-mce-badge {
   display: inline-flex;
   align-items: center;
