@@ -280,6 +280,7 @@
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/config.js"></script>
+  <script src="../js/nav.js"></script>
   <script>
     const CATEGORY_LABELS = {
       textbooks: 'Textbooks & Notes', drafter: 'Drafter Kit', bicycle: 'Bicycle',
@@ -297,25 +298,42 @@
     let userProfile = null;
 
     async function init() {
+      console.log('init() called');
       const params = new URLSearchParams(window.location.search);
       const id = params.get('id');
+      console.log('Listing ID from URL:', id);
 
-      if (!id) { showNotFound(); return; }
+      if (!id) {
+        console.log('No ID found, showing not found.');
+        showNotFound();
+        return;
+      }
 
+      console.log('Requiring authentication...');
       const user = await requireAuth();
-      if (!user) return;
+      if (!user) {
+        console.log('Authentication failed or no user session.');
+        return;
+      }
       currentUser = user;
+      console.log('Authenticated user:', currentUser);
+
+      console.log('Fetching user profile...');
       userProfile = await getUserProfile(user.id);
+      console.log('User profile:', userProfile);
 
       if (userProfile) {
         const initials = userProfile.full_name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
         document.getElementById('user-avatar').textContent = initials;
       }
 
+      console.log('Loading listing...');
       await loadListing(id);
+      console.log('init() finished.');
     }
 
     async function loadListing(id) {
+      console.log('Fetching listing from Supabase with ID:', id);
       const { data, error } = await supabaseClient
         .from('listings')
         .select('*')
@@ -324,14 +342,22 @@
 
       document.getElementById('page-loading').classList.add('hidden');
 
+      if (error) { console.error('Supabase error fetching listing:', error); }
+      if (!data) { console.log('No data returned for listing.'); }
       if (error || !data) { showNotFound(); return; }
-      if (data.status !== 'active') { showNotFound(); return; }
+      if (data.status !== 'active') {
+        console.log(`Listing status is "${data.status}", not "active". Showing not found.`);
+        showNotFound();
+        return;
+      }
 
       listing = data;
+      console.log('Listing data loaded:', listing);
       renderListing();
     }
 
     function renderListing() {
+      console.log('renderListing() called');
       const l = listing;
       const icon = CATEGORY_ICONS[l.category] || '📦';
       const catLabel = CATEGORY_LABELS[l.category] || l.category;
@@ -390,6 +416,15 @@
         document.getElementById('buy-area').classList.add('hidden');
         document.getElementById('purchased-msg').classList.remove('hidden');
       }
+    }
+
+    async function getUserProfile(userId) {
+        const { data, error } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+        return data;
     }
 
     // ── Razorpay Payment ──

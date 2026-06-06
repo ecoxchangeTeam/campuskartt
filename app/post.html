@@ -622,8 +622,7 @@
       const desc = document.getElementById('item-desc').value.trim();
       const condition = document.getElementById('selected-condition').value;
       const price = parseFloat(document.getElementById('item-price').value);
-      // Store buyer-facing price (seller price + 10% markup)
-      const listingPrice = Math.round(price * 1.10);
+      const listingPrice = Math.round(price * 1.10); // Buyer-facing price
       const university = document.getElementById('item-university').value.trim();
       const pickup = document.getElementById('item-pickup').value.trim();
       if (!title || !price || !university || !pickup) { showError('Please fill in all required fields.'); return; }
@@ -632,7 +631,9 @@
         let photoUrl = null;
         if (selectedPhotoFile) photoUrl = await uploadPhoto(selectedPhotoFile);
         const { data, error } = await supabaseClient.from('listings').insert({
-          seller_id: currentUser.id, title, description: desc, category, price: listingPrice, condition,
+          seller_id: currentUser.id, title, description: desc, category,
+          price: listingPrice, // Use the marked-up price for the listing
+          condition,
           photo_url: photoUrl, university, pickup_point: pickup, status: 'active',
         }).select().single();
         if (error) throw error;
@@ -705,31 +706,7 @@
     }
 
     // ── EcoXchange SSO: Auto-login if tokens passed in URL hash ────────────
-    // When a user clicks "Sell" on EcoXchange, tokens are passed in the hash
-    // so they don't need to sign in again on CampusKartt.
-    async function restoreEcoSession() {
-      const hash = window.location.hash.slice(1); // remove leading '#'
-      if (!hash) return false;
-      const params = new URLSearchParams(hash);
-      const accessToken  = params.get('eco_access_token');
-      const refreshToken = params.get('eco_refresh_token');
-      if (!accessToken || !refreshToken) return false;
-      try {
-        const { data, error } = await supabaseClient.auth.setSession({
-          access_token:  decodeURIComponent(accessToken),
-          refresh_token: decodeURIComponent(refreshToken),
-        });
-        if (error || !data?.session) return false;
-        // Clean up hash from URL so tokens aren't in browser history
-        history.replaceState(null, '', window.location.pathname + window.location.search);
-        return true;
-      } catch {
-        return false;
-      }
-    }
-    // ────────────────────────────────────────────────────────────────────────
-
-    restoreEcoSession().then(() => init());
+    window.ecoSessionRestored.then(() => init());
 
   </script>
 </body>

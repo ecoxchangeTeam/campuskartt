@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Campus Kartt — Global Navigation & Footer Logic
  * Ported from college-community/static/javascripts/browse.js
  * Enhanced with DTU Red theme, GSAP ScrollTrigger sections, and MCE badge
@@ -262,7 +262,19 @@ async function ckPopulateUser() {
 /* ── Logout ── */
 async function ckLogout() {
   if (typeof supabaseClient !== 'undefined') await supabaseClient.auth.signOut();
-  window.location.href = '/app/login.html';
+
+  // ── Federated Single Log-Out (SLO) with EcoXchange ──
+  // Next.js (EcoXchange) development server runs on http://localhost:3000
+  const ECOXCHANGE_DEV_URL = 'http://localhost:3000';
+  const ECOXCHANGE_PROD_URL = 'https://www.ecoxchange.in';
+
+  let targetUrl = ECOXCHANGE_DEV_URL;
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    targetUrl = ECOXCHANGE_PROD_URL;
+  }
+
+  const returnUrl = encodeURIComponent(window.location.origin + '/app/login.html');
+  window.location.href = `${targetUrl}/api/auth/signout?callbackUrl=${returnUrl}`;
 }
 
 /* ── Newsletter ── */

@@ -439,8 +439,36 @@
     }
 
     (async () => {
-      const { data:{ user } } = await supabaseClient.auth.getUser();
-      if (user) window.location.href = '/app/browse.html';
+      const urlParams = new URLSearchParams(window.location.search);
+      const action = urlParams.get('action');
+      const redirectTo = urlParams.get('redirect_to');
+
+      // ── Handle Federated Single Sign-Out (SLO) ──
+      if (action === 'logout') {
+        if (typeof supabaseClient !== 'undefined') {
+          await supabaseClient.auth.signOut();
+        }
+        if (redirectTo) {
+          window.location.href = decodeURIComponent(redirectTo);
+        } else {
+          window.location.href = 'login.html';
+        }
+        return;
+      }
+
+      // Wait for any async SSO token parsing to finish first
+      if (window.ecoSessionRestored) {
+        await window.ecoSessionRestored;
+      }
+
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (user) {
+        if (redirectTo) {
+          window.location.href = decodeURIComponent(redirectTo);
+        } else {
+          window.location.href = '/app/browse.html';
+        }
+      }
     })();
   </script>
 </body>

@@ -550,6 +550,19 @@
     };
     const CONDITION_CLASSES = { like_new:'badge-green', good:'badge-yellow', fair:'badge-blue', old:'badge-gray' };
 
+    async function getUserProfile(userId) {
+        const { data, error } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+        if (error) {
+            console.error('Error fetching profile:', error);
+            return null;
+        }
+        return data;
+    }
+
     async function init() {
       try {
         const { data:{ user }, error } = await supabaseClient.auth.getUser();
@@ -628,7 +641,7 @@
           ? `<img src="${l.photo_url}" alt="${l.title}" loading="lazy" />`
           : `<div class="ck-card-placeholder">${icon}</div>`;
         return `
-          <article class="ck-product-card" onclick="window.location.href='listing.html?id=${l.id}'" tabindex="0">
+          <article class="ck-product-card" tabindex="0">
             <div class="ck-card-img-wrap">
               ${imgHtml}
               <div class="ck-card-badge-wrap">
@@ -642,8 +655,8 @@
               <div class="ck-card-yield">Seller gets ₹${Math.round(l.price*0.9).toLocaleString('en-IN')}</div>
             </div>
             <div class="ck-card-footer">
-              <span class="ck-card-location">📍 ${l.pickup_point || l.university || 'Campus'}</span>
-              <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();window.location.href='listing.html?id=${l.id}'">View →</button>
+              <div class="ck-card-location">📍 ${l.university}</div>
+              <a href="/app/listing.html?id=${l.id}" class="btn btn-secondary btn-sm">View →</a>
             </div>
           </article>`;
       }).join('');

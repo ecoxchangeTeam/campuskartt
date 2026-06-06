@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // Campus Kartt — Configuration File
 // ============================================================
 // STEP 1: Go to your Supabase project
@@ -27,6 +27,33 @@ const RAZORPAY_KEY_ID = 'rzp_test_SZ2YHJzqSoFRb0';
 // Initialize Supabase client
 // ============================================================
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── EcoXchange SSO: Auto-login if tokens passed in URL hash ────────────
+window.ecoSessionRestored = (async () => {
+  if (typeof window === 'undefined') return false;
+  const hash = window.location.hash.slice(1);
+  if (!hash) return false;
+
+  const params = new URLSearchParams(hash);
+  const accessToken  = params.get('eco_access_token');
+  const refreshToken = params.get('eco_refresh_token');
+  if (!accessToken || !refreshToken) return false;
+
+  try {
+    const { data, error } = await supabaseClient.auth.setSession({
+      access_token:  decodeURIComponent(accessToken),
+      refresh_token: decodeURIComponent(refreshToken),
+    });
+    if (error || !data?.session) return false;
+
+    // Clean up hash from URL immediately so tokens aren't in browser history
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    return true;
+  } catch (err) {
+    console.error('EcoXchange SSO session restoration error:', err);
+    return false;
+  }
+})();
 
 // ============================================================
 // App Constants
@@ -65,9 +92,13 @@ async function getCurrentUser() {
 
 // Helper: redirect if not logged in
 async function requireAuth() {
+  if (window.ecoSessionRestored) {
+    await window.ecoSessionRestored;
+  }
   const user = await getCurrentUser();
   if (!user) {
-    window.location.href = 'login.html';
+    const returnUrl = encodeURIComponent(window.location.pathname + window.location.search + window.location.hash);
+    window.location.href = `login.html?redirect_to=${returnUrl}`;
     return null;
   }
   return user;
