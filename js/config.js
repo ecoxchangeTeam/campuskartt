@@ -8,8 +8,14 @@
 // STEP 5: Copy "anon public" key → paste below as SUPABASE_ANON_KEY
 // ============================================================
 
-const SUPABASE_URL = 'https://edzicxebgtiosahshvgi.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkemljeGViZ3Rpb3NhaHNodmdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNDIxMzIsImV4cCI6MjA5MDYxODEzMn0._gV35IiY97ufGvHMGDEZHiT0zISIaugK8tk90IJiJDE';
+// NOTE: Since this is a static frontend website, the browser runs this file directly
+// and does not read from your .env file. You must copy/paste new values here.
+const SUPABASE_URL = 'https://sgehqcxbjrlwviphbtwv.supabase.co';
+
+// WARNING: You have currently pasted a `service_role` key in your .env.
+// The service_role key bypasses RLS (Row Level Security) and MUST NEVER be exposed in the browser!
+// Please replace this key with the "anon public" key from your Supabase Dashboard -> Settings -> API.
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNnZWhxY3hianJsd3ZpcGhidHd2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDk3OTQwOCwiZXhwIjoyMDk2NTU1NDA4fQ.Dc2k80FevRgsDHFfLaG6if3pZb_fKdf2shHGzafFIME';
 
 // ============================================================
 // CLOUDINARY — For photo uploads
